@@ -8,16 +8,9 @@ app.use(express.json());
 require('dotenv').config()
 
 const port = process.env.PORT || 5001;
-// 13uBVpLgWEgFQRiv
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.xvulc.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-// client.connect(err => {
-//   const collection = client.db("test").collection("devices");
-//   // perform actions on the collection object
-//   client.close();
-// });
-
 
 
 async function run(){
@@ -26,6 +19,7 @@ async function run(){
         const database = client.db('pixacam');
         const allProductCollection = database.collection("allProduct");
         const allOrderCollection = database.collection("allOrder");
+        const allReviewCollection = database.collection("allReview")
 
         // Product 
         app.get('/products', async(req, res)=>{
@@ -78,6 +72,20 @@ async function run(){
             };
             const result = await allOrderCollection.updateOne(filter, updateDoc, options);
             res.json(result);
+        })
+
+        // review post in database
+        app.post('/reviews', async(req, res)=>{
+            const reviews = req.body;
+            const result = await allReviewCollection.insertOne(reviews);
+            res.json(result);
+        })
+
+        // reviews get from database
+        app.get('/reviews', async(req, res)=>{
+            const cursor = allReviewCollection.find({});
+            const review = await cursor.toArray();
+            res.send(review);
         })
 
     }
