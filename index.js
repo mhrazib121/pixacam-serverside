@@ -19,7 +19,8 @@ async function run(){
         const database = client.db('pixacam');
         const allProductCollection = database.collection("allProduct");
         const allOrderCollection = database.collection("allOrder");
-        const allReviewCollection = database.collection("allReview")
+        const allReviewCollection = database.collection("allReview");
+        const allUserCollection = database.collection("allUser");
 
         // Product 
         app.get('/products', async(req, res)=>{
@@ -86,6 +87,20 @@ async function run(){
             const cursor = allReviewCollection.find({});
             const review = await cursor.toArray();
             res.send(review);
+        })
+
+        // user post in database
+        app.post ('/users', async(req, res)=>{
+            const users = req.body;
+            const result = await allUserCollection.insertOne(users);
+            res.json(result);
+        })
+
+        // users get from database
+        app.get('/users', async(req, res)=>{
+            const cursor = allUserCollection.find({});
+            const user = await cursor.toArray();
+            res.send(user)
         })
 
     }
