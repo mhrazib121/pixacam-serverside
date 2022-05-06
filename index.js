@@ -21,6 +21,7 @@ async function run(){
         const allOrderCollection = database.collection("allOrder");
         const allReviewCollection = database.collection("allReview");
         const allUserCollection = database.collection("allUser");
+        const productsCardCollection = database.collection("productsCard");
 
         // Product 
         app.get('/products', async(req, res)=>{
@@ -103,6 +104,20 @@ async function run(){
             res.send(user)
         })
 
+        // details of added card post in database  
+        app.post('/productscard', async(req, res)=>{
+            const productsCard = req.body;
+            const result = await productsCardCollection.insertOne(productsCard);
+            res.json(result);
+        })
+
+        // details of get card post from database 
+        app.get('/productscard', async(req, res)=>{
+            const cursor = productsCardCollection.find({});
+            const productincard = await cursor.toArray();
+            res.send(productincard);
+        })
+
         // Admin
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
@@ -144,5 +159,5 @@ app.get('/', (req,res)=>{
 })
 
 app.listen(port,()=>{
-    console.log('connected')
+    console.log('connected from server')
 })
