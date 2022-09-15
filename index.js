@@ -135,6 +135,14 @@ async function run() {
             res.json(result);
         })
 
+        app.delete('/productscard/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id)
+            const query = { _id: ObjectId(id) }
+            const result = await productsCardCollection.deleteOne(query);
+            res.json(result);
+        })
+
         // Admin
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
