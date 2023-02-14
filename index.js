@@ -126,14 +126,16 @@ async function run() {
             const options = { upsert: true };
             const updateDoc = {
                 $set: {
-                     cart: product.cart
+                    cart: product.cart
                 },
             };
             console.log(updateDoc)
             const result = await productsCardCollection.updateOne(filter, updateDoc, options);
             console.log('result', result)
             res.json(result);
-        })
+        });
+
+        // Delete
 
         app.delete('/productscard/:id', async (req, res) => {
             const id = req.params.id;
