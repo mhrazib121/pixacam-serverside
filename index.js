@@ -135,8 +135,6 @@ async function run() {
             res.json(result);
         });
 
-        // Delete products
-
         app.delete('/productscard/:id', async (req, res) => {
             const id = req.params.id;
             console.log(id)
