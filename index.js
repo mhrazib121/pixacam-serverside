@@ -135,7 +135,7 @@ async function run() {
             res.json(result);
         });
 
-        // Delete edit
+        // Delete removed
 
         app.delete('/productscard/:id', async (req, res) => {
             const id = req.params.id;
