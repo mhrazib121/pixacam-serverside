@@ -1,4 +1,4 @@
-const { MongoClient, ObjectId } = require('mongodb');
+const { MongoClient, ObjectId, ServerApiVersion } = require('mongodb');
 const express = require('express');
 require('dotenv').config();
 const cors = require('cors');
@@ -9,17 +9,17 @@ app.use(express.json());
 
 const port = process.env.PORT || 5001;
 
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*")
-})
+// app.use((req, res, next) => {
+//     res.header("Access-Control-Allow-Origin", "*")
+// })
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.xvulc.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
 async function run() {
     try {
-        client.connect();
+        await client.connect();
         const database = client.db('pixacam');
         const allProductCollection = database.collection("allProduct");
         const allOrderCollection = database.collection("allOrder");
@@ -31,7 +31,7 @@ async function run() {
         app.get('/products', async (req, res) => {
             const cursor = allProductCollection.find({});
             const product = await cursor.toArray();
-            res.send(product);
+            res.json(product);
         })
 
         // Product post in server 
@@ -105,7 +105,7 @@ async function run() {
         app.get('/users', async (req, res) => {
             const cursor = allUserCollection.find({});
             const user = await cursor.toArray();
-            res.send(user)
+            res.send(user);
         })
 
         // details of added card post in database  
@@ -146,6 +146,11 @@ async function run() {
             res.json(result);
         })
 
+        app.delete('/productscard', async (req, res) => {
+            const result = await productsCardCollection.deleteMany({});
+            res.json(result);
+        })
+
         // Admin
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
@@ -183,7 +188,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get('/', (req, res) => {
-    res.send('Hellow World')
+    res.send('Hello World')
 })
 
 app.listen(port, () => {
