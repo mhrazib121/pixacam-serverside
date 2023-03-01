@@ -1,9 +1,9 @@
 const { MongoClient, ObjectId, ServerApiVersion } = require('mongodb');
 const express = require('express');
 require('dotenv').config();
+const app = express();
 const cors = require('cors');
 
-const app = express();
 app.use(cors())
 app.use(express.json());
 
@@ -19,7 +19,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run() {
     try {
-        await client.connect();
+        // await client.connect();
         const database = client.db('pixacam');
         const allProductCollection = database.collection("allProduct");
         const allOrderCollection = database.collection("allOrder");
@@ -31,7 +31,8 @@ async function run() {
         app.get('/products', async (req, res) => {
             const cursor = allProductCollection.find({});
             const product = await cursor.toArray();
-            res.json(product);
+            res.send(product);
+            console.log(product)
         })
 
         // Product post in server 
