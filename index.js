@@ -1,22 +1,25 @@
-const { MongoClient, ObjectId } = require('mongodb');
+const { MongoClient, ObjectId, ServerApiVersion } = require('mongodb');
 const express = require('express');
-const cors = require('cors');
-// const res = require('express/lib/response');
-
+require('dotenv').config();
 const app = express();
+const cors = require('cors');
+
 app.use(cors())
 app.use(express.json());
-require('dotenv').config()
 
 const port = process.env.PORT || 5001;
 
+// app.use((req, res, next) => {
+//     res.header("Access-Control-Allow-Origin", "*")
+// })
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.xvulc.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
 async function run() {
     try {
-        await client.connect();
+        // await client.connect();
         const database = client.db('pixacam');
         const allProductCollection = database.collection("allProduct");
         const allOrderCollection = database.collection("allOrder");
@@ -29,6 +32,7 @@ async function run() {
             const cursor = allProductCollection.find({});
             const product = await cursor.toArray();
             res.send(product);
+            console.log(product)
         })
 
         // Product post in server 
@@ -102,7 +106,7 @@ async function run() {
         app.get('/users', async (req, res) => {
             const cursor = allUserCollection.find({});
             const user = await cursor.toArray();
-            res.send(user)
+            res.send(user);
         })
 
         // details of added card post in database  
@@ -140,6 +144,11 @@ async function run() {
             console.log(id)
             const query = { _id: ObjectId(id) }
             const result = await productsCardCollection.deleteOne(query);
+            res.json(result);
+        })
+
+        app.delete('/productscard', async (req, res) => {
+            const result = await productsCardCollection.deleteMany({});
             res.json(result);
         })
 
