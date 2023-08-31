@@ -10,11 +10,10 @@ const { uuid } = require("uuidv4");
 const { default: fetch } = require("node-fetch");
 const { response } = require("./utils/response");
 const { StatusCodes } = require("http-status-codes");
-// const { default: fetch } = require("node-fetch");
+const { BkashGateway } = require("bkash-payment-gateway");
 
 app.use(cors());
 app.use(express.json());
-// const router = express.Router();
 app.use(grantToken);
 
 // console.log(" grant Token", grantToken);
@@ -24,6 +23,16 @@ const port = process.env.PORT || 5001;
 // app.use((req, res, next) => {
 //     res.header("Access-Control-Allow-Origin", "*")
 // })
+const bkashConf = {
+  //get intellisense here
+  baseURL: "https://checkout.sandbox.bka.sh/v1.2.0-beta",
+  key: process.env.BKASH_API_KEY,
+  username: process.env.BKASH_USERNAME,
+  password: process.env.BKASH_PASSWORD,
+  secret: process.env.BKASH_SECRET,
+};
+
+const bkash = new BkashGateway(bkashConf);
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.xvulc.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -60,29 +69,85 @@ async function run() {
 
     // Order post in Database
     app.post("/orders", async (req, res) => {
-      const { amount } = req.body;
+      const paymentRequest = {
+        amount: 1,
+        orderID: "Inv" + uuid(),
+        intent: "sale",
+      };
 
-      const result = await fetch(bkashConfig.create_payment_url, {
-        method: "POST",
-        headers: await authHeaders(),
-        body: JSON.stringify({
-          mode: "0011",
-          payerReference: " ",
-          callbackURL: `${bkashConfig.backend_callback_url}`,
-          amount: amount ? amount : "1",
-          currency: "BDT",
-          intent: "sale",
-          merchantInvoiceNumber: "Inv" + uuid(),
-        }),
-      });
-      const data = await result.json();
+      const result = await bkash.createPayment(paymentRequest);
+      console.log(result);
+      res.send(result);
+      // const { amount } = req.body;
 
-      return response(res, StatusCodes.CREATED, true, { data }, "");
+      // const result = await fetch(bkashConfig.create_payment_url, {
+      //   method: "POST",
+      //   headers: await authHeaders(),
+      //   body: JSON.stringify({
+      //     mode: "0011",
+      //     payerReference: " ",
+      //     callbackURL: `${bkashConfig.backend_callback_url}`,
+      //     amount: amount ? amount : "1",
+      //     currency: "BDT",
+      //     intent: "sale",
+      //     merchantInvoiceNumber: "Inv" + uuid(),
+      //   }),
+      // });
+      // const data = await result.json();
+      // console.log("object result", data);
+
+      // return response(res, StatusCodes.CREATED, true, { data }, "");
 
       // return response(res, StatusCodes.CREATED, true, { data }, "");
       //   const order = req.body;
       //   const result = await allOrderCollection.insertOne(order);
       //   res.json(result);
+    });
+    app.post("/execute/:paymentID", async (req, res) => {
+      const { paymentID } = req.params;
+      const result = await bkash.executePayment(paymentID);
+      console.log(" execute result", result);
+      res.send(result);
+      // try {
+      //   console.log("Execute Payment API Start !!!");
+
+      //   const { paymentID } = req.params;
+      //   console.log("paymentID", paymentID);
+
+      //   const executeResponse = await fetch(
+      //     `bkashConfig.execute_payment_url/${paymentID}`,
+      //     {
+      //       method: "POST",
+      //       headers: await authHeaders(),
+      //       // body: JSON.stringify({
+      //       //   paymentID,
+      //       // }),
+      //     }
+      //   );
+      //   const result = await executeResponse.json();
+      //   console.log(
+      //     "🚀 ~ file: bkashPayment.controller.js:58 ~ bkashCallback ~ result:",
+      //     result
+      //   );
+
+      //   if (result.statusCode && result.statusCode === "0000") {
+      //     console.log("Payment Successful !!! ");
+      //     // save response in your db
+
+      //     // Your frontend success route
+      //     return res.redirect(
+      //       `${bkashConfig.frontend_success_url}?data=${result.statusMessage}`
+      //     );
+      //   } else {
+      //     console.log("Payment Failed !!!");
+
+      //     return res.redirect(bkashConfig.frontend_fail_url);
+      //   }
+      // } catch (e) {
+      //   console.log("Payment Failed catch!!!");
+
+      //   return res.redirect(bkashConfig.frontend_fail_url);
+      // }
     });
 
     // get order details from database

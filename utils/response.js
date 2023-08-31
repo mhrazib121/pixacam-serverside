@@ -6,7 +6,7 @@ const response = async (res, code, status, data, message) => {
   }
   return res.status(code).json({
     status: status,
-    data: data,
+    data: data.data,
     message: message,
   });
 };

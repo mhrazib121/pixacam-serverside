@@ -8,7 +8,6 @@ const { default: fetch } = require("node-fetch");
 
 const grantToken = async (req, res, next) => {
   try {
-    console.log("Grant Token API Start !!", tokenHeaders());
     const tokenResponse = await fetch(bkashConfig.grant_token_url, {
       method: "POST",
       headers: tokenHeaders(),
