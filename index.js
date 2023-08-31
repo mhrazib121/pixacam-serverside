@@ -14,6 +14,7 @@ const { BkashGateway } = require("bkash-payment-gateway");
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(grantToken);
 
 // console.log(" grant Token", grantToken);
@@ -69,6 +70,11 @@ async function run() {
 
     // Order post in Database
     app.post("/orders", async (req, res) => {
+      const order = req.body;
+      const result = await allOrderCollection.insertOne(order);
+      res.json(result);
+    });
+    app.post("/createCheckout", async (req, res) => {
       const paymentRequest = {
         amount: 1,
         orderID: "Inv" + uuid(),
@@ -78,30 +84,6 @@ async function run() {
       const result = await bkash.createPayment(paymentRequest);
       console.log(result);
       res.send(result);
-      // const { amount } = req.body;
-
-      // const result = await fetch(bkashConfig.create_payment_url, {
-      //   method: "POST",
-      //   headers: await authHeaders(),
-      //   body: JSON.stringify({
-      //     mode: "0011",
-      //     payerReference: " ",
-      //     callbackURL: `${bkashConfig.backend_callback_url}`,
-      //     amount: amount ? amount : "1",
-      //     currency: "BDT",
-      //     intent: "sale",
-      //     merchantInvoiceNumber: "Inv" + uuid(),
-      //   }),
-      // });
-      // const data = await result.json();
-      // console.log("object result", data);
-
-      // return response(res, StatusCodes.CREATED, true, { data }, "");
-
-      // return response(res, StatusCodes.CREATED, true, { data }, "");
-      //   const order = req.body;
-      //   const result = await allOrderCollection.insertOne(order);
-      //   res.json(result);
     });
     app.post("/execute/:paymentID", async (req, res) => {
       const { paymentID } = req.params;
